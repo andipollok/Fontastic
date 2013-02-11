@@ -1,7 +1,7 @@
 Fontastic
 =========
 
-A Processing library to create TrueType font files
+A Processing library to create font files
 
 By Andreas Koller
 
