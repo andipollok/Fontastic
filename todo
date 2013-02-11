@@ -7,6 +7,4 @@ TODO List
 
  - OTF Export
 
- - Webfont (WOFF) Export, most probably using sfntly
-
- - Look into UFO format and implement 
+ - Look into UFO format and implement UFO exporter
