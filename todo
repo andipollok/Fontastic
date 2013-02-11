@@ -1,0 +1,12 @@
+Fontastic
+
+
+TODO List
+
+ - use different engine to create fonts. Now, doubletype is used, but it seems not in further development any more. 
+
+ - OTF Export
+
+ - Webfont (WOFF) Export, most probably using sfntly
+
+ - Look into UFO format and implement 

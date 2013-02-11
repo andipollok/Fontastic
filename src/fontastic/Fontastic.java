@@ -1,11 +1,13 @@
 /**
  * Fontastic
- * A TrueType font file writer for Processing.
+ * A font file writer for Processing.
  * http://code.andreaskoller.com/libraries/fontastic
  *
  * Copyright 2013 Andreas Koller http://andreaskoller.com
  *
- * Uses doubletype http://sourceforge.net/projects/doubletype/
+ * Uses:
+ *  doubletype http://sourceforge.net/projects/doubletype/ for TTF creation
+ *  sfntly http://code.google.com/p/sfntly/ for WOFF creation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +25,8 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
- * @modified    02/02/2013
- * @version     0.1 (1)
+ * @modified    02/11/2013
+ * @version     0.2 (2)
  */
 
 package fontastic;
@@ -36,28 +38,25 @@ import fontastic.FContour;
 import fontastic.FPoint;
 
 import org.doubletype.ossa.*;
-import org.doubletype.ossa.property.*;
 import org.doubletype.ossa.module.*;
-import org.doubletype.ossa.xml.*;
 import org.doubletype.ossa.truetype.*;
-import org.doubletype.ossa.action.*;
 import org.doubletype.ossa.adapter.*;
 
-import com.ibm.icu.impl.data.*;
-import com.ibm.icu.util.*;
-import com.ibm.icu.impl.*;
-import com.ibm.icu.text.*;
-import com.ibm.icu.lang.*;
+import com.google.typography.font.sfntly.Font;
+import com.google.typography.font.sfntly.FontFactory;
+import com.google.typography.font.sfntly.data.WritableFontData;
+import com.google.typography.font.tools.conversion.woff.WoffWriter;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
- * Fontastic
- * A TrueType font file writer for Processing.
- * http://code.andreaskoller.com/libraries/fontastic
+ * Fontastic A font file writer for Processing. http://code.andreaskoller.com/libraries/fontastic
  * 
  * @example Fontastic
  * 
@@ -71,18 +70,26 @@ public class Fontastic {
 	private org.doubletype.ossa.Engine m_engine;
 
 	private String fontname;
+
 	private String TTFfilename;
-	private List<FGlyph> glyphs;
+	private String WOFFfilename;
+	private String HTMLfilename;
 	
+	private List<FGlyph> glyphs;
+
 	private int advanceWidth = 512;
 
-	public final static String VERSION = "0.1";
+	public final static String VERSION = "0.2";
 	private boolean debug = true; // debug toggles println calls
 
 	/** Uppercase alphabet 26 characters **/
-	public final static char alphabet[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+	public final static char alphabet[] = { 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+			'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+			'U', 'V', 'W', 'X', 'Y', 'Z' };
 	/** Lowercase alphabet 26 characters **/
-	public final static char alphabetLc[] = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+	public final static char alphabetLc[] = { 'a', 'b', 'c', 'd', 'e', 'f',
+			'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+			't', 'u', 'v', 'w', 'x', 'y', 'z' };
 
 	/**
 	 * Return the version of the library.
@@ -92,7 +99,7 @@ public class Fontastic {
 	public static String version() {
 		return VERSION;
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
@@ -110,8 +117,7 @@ public class Fontastic {
 		intitialiseFont();
 		this.glyphs = new ArrayList<FGlyph>();
 	}
-	
-	
+
 	/**
 	 * Returns the font name.
 	 * 
@@ -121,10 +127,9 @@ public class Fontastic {
 		return fontname;
 	}
 
-
 	/**
-	 * Creates and initialises a new typeface.
-	 * Font data is put into sketch folder data/fontname.
+	 * Creates and initialises a new typeface. Font data is put into sketch
+	 * folder data/fontname.
 	 */
 	private void intitialiseFont() {
 		File data_dir = new File(myParent.dataPath(""));
@@ -138,49 +143,57 @@ public class Fontastic {
 		} else {
 			deleteFolderContents(a_dir, false);
 		}
-		
+
 		m_engine = Engine.getSingletonInstance();
 		m_engine.buildNewTypeface(fontname, a_dir);
 
 		this.setFontFamilyName(fontname);
-		this.setVersion("CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/"); // default license
+		this.setVersion("CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/"); // default
+																						// license
 
-		TTFfilename = a_dir + File.separator + "bin" + File.separator + fontname + ".ttf";
+		String directoryName = a_dir + File.separator + "bin" + File.separator;
 
+		TTFfilename = directoryName + fontname + ".ttf";
+		WOFFfilename = directoryName + fontname + ".woff";
+		HTMLfilename = directoryName + "template.html";
 	}
 
 	/**
-	 * Builds the font and writes the .ttf file.
-	 * If debug is set (default is true) then you'll see the .ttf file name in the console.
+	 * Builds the font and writes the .ttf and the .woff file as well as a HTML template for previewing the WOFF.
+	 * If debug is set (default is true) then you'll see the .ttf and .woff file name in the console.
 	 */
 	public void buildFont() {
-
+		
+		// Create TTF file with doubletype
+		
 		m_engine.addDefaultGlyphs();
 
 		for (FGlyph glyph : glyphs) {
-			
+
 			GlyphFile glyphFile = m_engine.addNewGlyph(glyph.getGlyphChar());
 			glyphFile.setAdvanceWidth(glyph.getAdvanceWidth());
 
 			for (FContour contour : glyph.getContours()) {
-				
+
 				EContour econtour = new EContour();
 				econtour.setType(EContour.k_cubic);
-				
+
 				for (FPoint point : contour.points) {
-					
+
 					EContourPoint e = new EContourPoint(point.x, point.y, true);
 
 					if (point.hasControlPoint1()) {
-						EControlPoint cp1 = new EControlPoint(true, point.controlPoint1.x, point.controlPoint1.y);
+						EControlPoint cp1 = new EControlPoint(true,
+								point.controlPoint1.x, point.controlPoint1.y);
 						e.setControlPoint1(cp1);
 					}
 
-					if(point.hasControlPoint2()) { 
-						EControlPoint cp2 = new EControlPoint(false, point.controlPoint2.x, point.controlPoint2.y);
+					if (point.hasControlPoint2()) {
+						EControlPoint cp2 = new EControlPoint(false,
+								point.controlPoint2.x, point.controlPoint2.y);
 						e.setControlPoint2(cp2);
 					}
-			
+
 					econtour.addContourPoint(e);
 				}
 
@@ -190,21 +203,88 @@ public class Fontastic {
 		}
 
 		m_engine.buildTrueType(false);
-		if (debug) System.out.println("Built TTF file "+getTTFfilename());
+		if (debug)
+			System.out.println("TTF file created successfully: " + getTTFfilename());
+
+		// End TTF creation
+		
+		// Create a WOFF file from this TTF file using sfntly
+
+		FontFactory fontFactory = FontFactory.getInstance();
+
+		File fontFile = new File(getTTFfilename());
+		File outputFile = new File(WOFFfilename);
+
+		byte[] fontBytes = new byte[0];
+		try {
+			FileInputStream fis = new FileInputStream(fontFile);
+			fontBytes = new byte[(int) fontFile.length()];
+			fis.read(fontBytes);
+		} catch (IOException e) {
+			System.out
+					.println("Error while creating WOFF File. TTF file not found: "
+							+ getTTFfilename());
+			e.printStackTrace();
+		}
+
+		Font[] fontArray = null;
+		try {
+			fontArray = fontFactory.loadFonts(fontBytes);
+		} catch (IOException e) {
+			System.out
+					.println("Error while creating WOFF File. TTF file could not be read: "
+							+ getTTFfilename());
+			e.printStackTrace();
+		}
+		Font font = fontArray[0];
+
+		try {
+			FileOutputStream fos = new FileOutputStream(outputFile);
+			WoffWriter w = new WoffWriter();
+			WritableFontData woffData = w.convert(font);
+			woffData.copyTo(fos);
+			if (debug)
+				System.out.println("WOFF File created successfully: "
+						+ getWOFFfilename());
+		} catch (IOException e) {
+			System.out
+					.println("Error while creating WOFF File. WOFF file could not be written."
+							+ outputFile);
+			e.printStackTrace();
+		}
+
+		// End of WOFF creation
+		
+		// Create HTML Template for WOFF file
+		String htmlTemplate = myParent.join(myParent.loadStrings("template.html"), "\n");
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("FONTNAME", fontname);
+		params.put("WOFFFILENAME", getWOFFfilename());
+		String htmlContent = replaceAll(htmlTemplate, params);
+		
+		myParent.saveStrings(HTMLfilename, myParent.split(htmlContent, "\n"));
+		// End HTML Template
 	}
-	
+
 	/**
-	 * Deletes all the glyph files created by doubletype in your data/fontname folder.
+	 * Deletes all the glyph files created by doubletype in your data/fontname
+	 * folder.
 	 */
 	public void cleanup() {
 
 		File a_dir = new File(myParent.dataPath(fontname));
-		File ttfFile = new File(getTTFfilename());
-		deleteFolderContents(a_dir, true, ttfFile);
-		if (debug) System.out.println("Cleaned up and deleted all glyph files, except TTF file.");
+		File[] filesToExclude = new File[3];
+		filesToExclude[0] = new File(getTTFfilename());
+		filesToExclude[1] = new File(getWOFFfilename());
+		filesToExclude[2] = new File(HTMLfilename);
+
+		deleteFolderContents(a_dir, true, filesToExclude);
+		if (debug)
+			System.out
+					.println("Cleaned up and deleted all glyph files, except font files.");
 
 	}
-	
+
 	/**
 	 * Sets the author of the font.
 	 */
@@ -227,8 +307,9 @@ public class Fontastic {
 	}
 
 	/**
-	 * Sets the font family name of the font. Also called in the constructor.
-	 * If changed with setFontFamilyName() it won't affect folder the font is stored in.
+	 * Sets the font family name of the font. Also called in the constructor. If
+	 * changed with setFontFamilyName() it won't affect folder the font is
+	 * stored in.
 	 */
 	public void setFontFamilyName(String fontFamilyName) {
 		m_engine.setFontFamilyName(fontFamilyName);
@@ -242,7 +323,8 @@ public class Fontastic {
 	}
 
 	/**
-	 * Sets the license of the font (default is "CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/")
+	 * Sets the license of the font (default is
+	 * "CC BY-SA 3.0 http://creativecommons.org/licenses/by-sa/3.0/")
 	 */
 	public void setTypefaceLicense(String typefaceLicense) {
 		m_engine.setTypefaceLicense(typefaceLicense);
@@ -263,8 +345,8 @@ public class Fontastic {
 	}
 
 	/**
-	 * Sets the advanceWidth of the font. Can be changed for every glyph individually.
-	 * Won't affect already created glyphs.
+	 * Sets the advanceWidth of the font. Can be changed for every glyph
+	 * individually. Won't affect already created glyphs.
 	 */
 	public void setAdvanceWidth(int advanceWidth) {
 		m_engine.setAdvanceWidth(advanceWidth);
@@ -281,7 +363,7 @@ public class Fontastic {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setBottomSideBearing(float bottomSideBearing) {
 		try {
 			m_engine.getTypeface().setBottomSideBearing(bottomSideBearing);
@@ -314,7 +396,7 @@ public class Fontastic {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setXHeight(float xHeight) {
 		try {
 			m_engine.getTypeface().setXHeight(xHeight);
@@ -323,26 +405,24 @@ public class Fontastic {
 					.println("Error while setting xHeight (must be within range 0 to "
 							+ m_engine.getTypeface().getEm()
 							+ " as well as lower than the ascender "
-							+ m_engine.getTypeface().getAscender() +")");
+							+ m_engine.getTypeface().getAscender() + ")");
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
-	 * Sets the default metrics for the typeface:
-	 * 	setTopSideBearing(170); // 2 px
-	 *  setAscender(683); // 8 px
-	 *  setXHeight(424); // 5 px
-	 *  setDescender(171); // 2 px
-	 *  setBottomSideBearing(0); // 0px
+	 * Sets the default metrics for the typeface: setTopSideBearing(170); // 2
+	 * px setAscender(683); // 8 px setXHeight(424); // 5 px setDescender(171);
+	 * // 2 px setBottomSideBearing(0); // 0px
 	 * 
 	 */
 	public void setDefaultMetrics() {
 		m_engine.getTypeface().setDefaultMetrics();
 	}
-	
+
 	/**
-	 * Sets debug to true (in debug mode, the library outputs what happens under the hood).
+	 * Sets debug to true (in debug mode, the library outputs what happens under
+	 * the hood).
 	 */
 	public void setDebug() {
 		setDebug(true);
@@ -351,7 +431,8 @@ public class Fontastic {
 	/**
 	 * Sets the value of debug
 	 * 
-	 * @param debug true or false
+	 * @param debug
+	 *            true or false
 	 */
 	public void setDebug(boolean debug) {
 		this.debug = debug;
@@ -360,7 +441,8 @@ public class Fontastic {
 	/**
 	 * Add a glyph
 	 * 
-	 * @param c Character of the glyph.
+	 * @param c
+	 *            Character of the glyph.
 	 * 
 	 * @return FGlyph that has been created.
 	 * 
@@ -370,7 +452,9 @@ public class Fontastic {
 		FGlyph glyph = new FGlyph(c);
 		glyph.setAdvanceWidth(advanceWidth);
 		glyphs.add(glyph);
-		if (debug) System.out.println("Glyph "+c+" added. Number of glyphs: "+glyphs.size());
+		if (debug)
+			System.out.println("Glyph " + c + " added. Number of glyphs: "
+					+ glyphs.size());
 		return glyph;
 
 	}
@@ -384,15 +468,17 @@ public class Fontastic {
 	 * @param FContour
 	 *            Shape of the glyph as FContour.
 	 * 
-	 * @return The glyph
-	 * 			  FGlyph that has been created. You can use this to store the glyph and add contours afterwards.
-	 * 			  Alternatively, you can call getGlyph(char c) to retrieve it.
+	 * @return The glyph FGlyph that has been created. You can use this to store
+	 *         the glyph and add contours afterwards. Alternatively, you can
+	 *         call getGlyph(char c) to retrieve it.
 	 */
 	public FGlyph addGlyph(char c, FContour contour) {
 
 		FGlyph glyph = new FGlyph(c);
 		glyphs.add(glyph);
-		if (debug) System.out.println("Glyph "+c+" added. Number of glyphs: "+glyphs.size());
+		if (debug)
+			System.out.println("Glyph " + c + " added. Number of glyphs: "
+					+ glyphs.size());
 
 		glyph.addContour(contour);
 
@@ -400,25 +486,27 @@ public class Fontastic {
 		return glyph;
 
 	}
-	
-	
+
 	/**
 	 * Add a glyph and its contours
 	 * 
 	 * @param c
 	 *            Character of the glyph.
 	 * 
-	 * @param FContour[]
-	 *            Shape of the glyph in an array of FContour.
+	 * @param FContour
+	 *            [] Shape of the glyph in an array of FContour.
 	 * 
-	 * @return The FGlyph that has been created. You can use this to store the glyph and add contours afterwards.
-	 * 			  Alternatively, you can call getGlyph(char c) to retrieve it.
+	 * @return The FGlyph that has been created. You can use this to store the
+	 *         glyph and add contours afterwards. Alternatively, you can call
+	 *         getGlyph(char c) to retrieve it.
 	 */
 	public FGlyph addGlyph(char c, FContour[] contours) {
 
 		FGlyph glyph = new FGlyph(c);
 		glyphs.add(glyph);
-		if (debug) System.out.println("Glyph "+c+" added. Number of glyphs: "+glyphs.size());
+		if (debug)
+			System.out.println("Glyph " + c + " added. Number of glyphs: "
+					+ glyphs.size());
 
 		for (FContour contour : contours) {
 			// if (debug) System.out.println(p.x + " - " + p.y);
@@ -428,21 +516,22 @@ public class Fontastic {
 		return glyph;
 
 	}
-	
+
 	/**
 	 * Get glyph by character
 	 * 
-	 * @param c The character of the glyph
+	 * @param c
+	 *            The character of the glyph
 	 * 
 	 * @return The glyph
 	 */
-	
+
 	public FGlyph getGlyph(char c) {
 
 		FGlyph glyph = null;
-		for (int i=0; i<glyphs.size(); i++) {
+		for (int i = 0; i < glyphs.size(); i++) {
 			if (glyphs.get(i).getGlyphChar() == c) {
-				glyph = glyphs.get(i);				
+				glyph = glyphs.get(i);
 				break;
 			}
 		}
@@ -453,8 +542,8 @@ public class Fontastic {
 	/**
 	 * Engine getter
 	 * 
-	 * @return The doubletype Engine used for font creation, so that you
-	 *         can access all functions of doubletype in case you need them.
+	 * @return The doubletype Engine used for font creation, so that you can
+	 *         access all functions of doubletype in case you need them.
 	 */
 	public Engine getEngine() {
 		return m_engine;
@@ -463,13 +552,13 @@ public class Fontastic {
 	/**
 	 * Returns the TypefaceFile
 	 * 
-	 * @return The doubletype TypefaceFile used for font creation,
-	 *         so that you can access functions of doubletype in case you need them.
+	 * @return The doubletype TypefaceFile used for font creation, so that you
+	 *         can access functions of doubletype in case you need them.
 	 */
 	public TypefaceFile getTypefaceFile() {
 		return m_engine.getTypeface();
 	}
-	
+
 	/**
 	 * Returns the .ttf file name
 	 * 
@@ -479,7 +568,17 @@ public class Fontastic {
 		return TTFfilename;
 	}
 
-	private static void deleteFolderContents(File folder, boolean deleteFolderItself) {
+	/**
+	 * Returns the .woff file name
+	 * 
+	 * @return The .woff file name, which is being created when you call build()
+	 */
+	public String getWOFFfilename() {
+		return WOFFfilename;
+	}
+
+	private static void deleteFolderContents(File folder,
+			boolean deleteFolderItself) {
 		File[] files = folder.listFiles();
 		if (files != null) { // some JVMs return null for empty dirs
 			for (File f : files) {
@@ -491,16 +590,23 @@ public class Fontastic {
 				}
 			}
 		}
-		if (deleteFolderItself) folder.delete();
+		if (deleteFolderItself)
+			folder.delete();
 	}
 
-	private static void deleteFolderContents(File folder, boolean deleteFolderItself, File exception) {
+	private static void deleteFolderContents(File folder,
+			boolean deleteFolderItself, File[] exceptions) {
 		File[] files = folder.listFiles();
 		if (files != null) { // some JVMs return null for empty dirs
 			for (File f : files) {
-				if (!f.equals(exception)) {
+				boolean deleteFile = true;
+				for (File exceptfile : exceptions) {
+					if (f.equals(exceptfile))
+						deleteFile = false;
+				}
+				if (deleteFile) {
 					if (f.isDirectory()) {
-						deleteFolderContents(f, true, exception);
+						deleteFolderContents(f, true, exceptions);
 						f.delete();
 					} else {
 						f.delete();
@@ -508,9 +614,10 @@ public class Fontastic {
 				}
 			}
 		}
-		if (deleteFolderItself) folder.delete();
+		if (deleteFolderItself)
+			folder.delete();
 	}
-	
+
 	private String sketchName() {
 		String s = myParent.sketchPath("");
 		s = s.substring(0, s.length() - 1);
@@ -518,5 +625,42 @@ public class Fontastic {
 				s.length());
 		return sketchName;
 	}
-	
+
+	// http://stackoverflow.com/questions/2368802/how-to-create-dynamic-template-string
+	// Author: cletus http://stackoverflow.com/users/18393/cletus
+	private static String replaceAll(String text, Map<String, String> params) {
+		return replaceAll(text, params, '%', '%');
+	}
+
+	// http://stackoverflow.com/questions/2368802/how-to-create-dynamic-template-string
+	// Author: cletus http://stackoverflow.com/users/18393/cletus
+	private static String replaceAll(String text, Map<String, String> params,
+			char leading, char trailing) {
+		String pattern = "";
+		if (leading != 0) {
+			pattern += leading;
+		}
+		pattern += "(\\w+)";
+		if (trailing != 0) {
+			pattern += trailing;
+		}
+		Pattern p = Pattern.compile(pattern);
+		Matcher m = p.matcher(text);
+		boolean result = m.find();
+		if (result) {
+			StringBuffer sb = new StringBuffer();
+			do {
+				String replacement = params.get(m.group(1));
+				if (replacement == null) {
+					replacement = m.group();
+				}
+				m.appendReplacement(sb, replacement);
+				result = m.find();
+			} while (result);
+			m.appendTail(sb);
+			return sb.toString();
+		}
+		return text;
+	}
+
 }

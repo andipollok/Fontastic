@@ -2,7 +2,7 @@ package fontastic;
 
 /**
  * Fontastic
- * A TrueType font file writer for Processing.
+ * A font file writer for Processing.
  * http://code.andreaskoller.com/libraries/fontastic
  *
  * Copyright 2013 Andreas Koller http://andreaskoller.com
@@ -23,8 +23,8 @@ package fontastic;
  * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
- * @modified    02/02/2013
- * @version     0.1 (1)
+ * @modified    02/11/2013
+ * @version     0.2 (2)
  */
 
 import processing.core.PVector;

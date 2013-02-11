@@ -1,5 +1,36 @@
-// based on P_3_2_1_01.pde by Generative Gestaltung
-// http://www.generative-gestaltung.de/P_3_2_1_01
+ /**
+ * Fontastic
+ * A font file writer for Processing.
+ * http://code.andreaskoller.com/libraries/fontastic
+ *
+ * Example: ConfettiFont
+ *
+ * How to create characters made of multiple shapes
+ * based on outlines of another font.
+ * - Press 's' to save ttf and woff files
+ *
+ * Based on the example P_3_2_1_01.pde by Generative Gestaltung
+ * http://www.generative-gestaltung.de/P_3_2_1_01
+ *
+ * Copyright 2013 Andreas Koller http://andreaskoller.com
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General
+ * Public License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+ * Boston, MA  02111-1307  USA
+ * 
+ * @author      Andreas Koller http://andreaskoller.com
+ */
 
 
 import fontastic.*;
@@ -22,22 +53,20 @@ void setup() {
   size(600, 400);
   fill(0);
 
-  // allways initialize the library in setup
+  // always initialize the library in setup
   RG.init(this);
+
+  // load the initial font
   font = new RFont("FreeSans.ttf",150);
 
   // get the points on the curve's shape
   // set style and segment resultion
-
   RCommand.setSegmentLength(10);
   RCommand.setSegmentator(RCommand.UNIFORMLENGTH);
-
-  int resolution = 8;
 
   initFont();
 
   updateFont();
-
 
 }
 
@@ -48,10 +77,7 @@ void draw() {
 
   background(255);
 
-  strokeWeight(2);
-  textSize(25); // for small numbers at bezier lines
-
-  int numberOfLetters = 10;
+  int numberOfLetters = 10; // the number of letters to display
   for (int i=0; i<numberOfLetters; i++) {
     pushMatrix();
     translate(width/2, height/3);
@@ -78,17 +104,18 @@ void draw() {
 
 void initFont() {
 
-  f = new Fontastic(this, "Confetti" + nf(version,4));
+  f = new Fontastic(this, "Confetti" + nf(version,4)); // create new Fontastic object
 
-  for (char c : Fontastic.alphabet) {
-    f.addGlyph(c);
+  // add letters to the font, without adding glyph shapes
+  for (char c : Fontastic.alphabet) {   
+    f.addGlyph(c);                      // add all uppercase letters from the alphabet 
   }
 
   for (char c : Fontastic.alphabetLc) {
-    f.addGlyph(c);
+    f.addGlyph(c);                      // add all lowercase letters from the alphabet
   }
 
-//  f.setFontFamilyName("Confetti");  // if font has same name, it won't be loaded by Processing in runtime
+//  f.setFontFamilyName("Confetti");  // if font has same name, it won't be loaded twice by Processing during runtime
   f.setAuthor("Andreas Koller");
   f.setVersion("0.1");
   f.setAdvanceWidth(int(charWidth * 1.1));
@@ -96,9 +123,6 @@ void initFont() {
 }
 
 void updateFont() {
-
-
-//  RCommand.setSegmentLength(mouseX / 2f);
   
   for (char c : Fontastic.alphabet) {
 
@@ -106,36 +130,28 @@ void updateFont() {
     RPoint[] pnts = shp.getPoints();
 
     f.getGlyph(c).clearContours();
-    //print("char "+c);
-
-    //println(pnts.length);
 
     for (int i=0; i<pnts.length-1; i++) {
+
       RPoint p = pnts[i];
-      // print(i);
       PVector[] points = new PVector[4];
 
       float circleSize = 20;
-      // points[0] = new PVector(p.x*5 - circleSize, -p.y*5 + circleSize);
-      // points[1] = new PVector(p.x*5 + circleSize, -p.y*5 + circleSize);
-      // points[2] = new PVector(p.x*5 + circleSize, -p.y*5 - circleSize);
-      // points[3] = new PVector(p.x*5 - circleSize, -p.y*5 - circleSize);
 
-      int resolution = 6;
+      int resolution = 6; // the resolution of a confetti circle
       points = new PVector[resolution];
       for (int j=0; j<resolution; j++) {
         float angle = TWO_PI/(resolution * 1f) * j;
         float x = p.x * 5 + sin(angle) * circleSize;
         float y = -p.y * 5 +  cos(angle) * circleSize;
-        x += (mouseX - width/2f) / width/2f * noise(i) * 2000;
-        y += (mouseY - height/2f) / height/2f * noise(i * 2) * 2000;
+        x += (mouseX - width/2f) / width/2f * noise(i+millis()/1000f) * 2000;
+        y -= (mouseY - height/2f) / height/2f * noise(i * 2+millis()/1000f) * 2000;
         points[j] = new PVector(x, y);
       }
 
       f.getGlyph(c).addContour(points);
 
     }
-    //println("-");
   }
 
 }
@@ -155,6 +171,9 @@ void createFont() {
   initFont();   // and make a new font right away
 
 }
+
+
+// A function to preview a glyph in Processing
 
 void renderGlyphSolid(char c) {
     
