@@ -1,3 +1,16 @@
+ /**
+ * Fontastic
+ * A font file writer for Processing.
+ * http://code.andreaskoller.com/libraries/fontastic
+ *
+ * Example: EqualizerFont
+ *
+ * How to create characters made out of horizonal lines for each character of the alphabet
+ *
+ * 
+ * @author      Andreas Koller http://andreaskoller.com
+ */
+ 
 import fontastic.*;
 
 
@@ -76,5 +89,6 @@ void createFont() {
   f.buildFont();
 
   f.cleanup();
+  
 }
 

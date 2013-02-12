@@ -23,7 +23,7 @@ package fontastic;
  * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
- * @modified    02/11/2013
+ * @modified    02/12/2013
  * @version     0.2 (2)
  */
 

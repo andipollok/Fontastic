@@ -1,4 +1,19 @@
+ /**
+ * Fontastic
+ * A font file writer for Processing.
+ * http://code.andreaskoller.com/libraries/fontastic
+ *
+ * Example: LabyrinthFont
+ *
+ * How to create characters of random lines in a 3x3 grid that make up a labyrinth.
+ * - Press SPACE to randomize labyrinth and create a new version of the font
+ *
+ * 
+ * @author      Andreas Koller http://andreaskoller.com
+ */
+ 
 import fontastic.*;
+
 
 Fontastic f;
 
@@ -36,8 +51,6 @@ void createFont() {
 
   version++;
 
-  if (f != null) { f.cleanup(); }
-
   f = new Fontastic(this, "Labyrinth" + nf(version,4));
   f.setAdvanceWidth(400);
 
@@ -47,7 +60,6 @@ void createFont() {
   for (char c : allChars) {
 
     f.addGlyph(c);
-    //    f.addGlyph(Character.toLowerCase(c));
 
     float thickness = 10;
     float charWidth = 400;
@@ -86,6 +98,8 @@ void createFont() {
   }
 
   f.buildFont();
+
+  f.cleanup();
   
 }
 

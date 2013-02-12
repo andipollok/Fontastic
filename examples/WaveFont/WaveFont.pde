@@ -1,3 +1,15 @@
+ /**
+ * Fontastic
+ * A font file writer for Processing.
+ * http://code.andreaskoller.com/libraries/fontastic
+ *
+ * Example: RandomFont
+ *
+ * How to create a random shape for each character of the alphabet.
+ * 
+ * @author      Andreas Koller http://andreaskoller.com
+ */
+
 import fontastic.*;
 import java.util.List;
 

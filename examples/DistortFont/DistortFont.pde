@@ -1,6 +1,19 @@
-// based on P_3_2_1_01.pde by Generative Gestaltung
-// http://www.generative-gestaltung.de/P_3_2_1_01
-
+ /**
+ * Fontastic
+ * A font file writer for Processing.
+ * http://code.andreaskoller.com/libraries/fontastic
+ *
+ * Example: DistortFont
+ *
+ * How to create character shapes based on another font.
+ * - Press 's' to save ttf and woff files
+ *   in the current state of distortion
+ *
+ * Based on the example P_3_2_1_01.pde by Generative Gestaltung
+ * http://www.generative-gestaltung.de/P_3_2_1_01
+ * 
+ * @author      Andreas Koller http://andreaskoller.com
+ */
 
 import fontastic.*;
 import geomerative.*;
@@ -17,18 +30,20 @@ int charWidth = 512;
 
 boolean fontBuilt = false;
 
+
 void setup() {
 
   size(600, 400);
   fill(0);
 
-  // allways initialize the library in setup
+  // always initialize the library in setup
   RG.init(this);
+  
+  // load the initial font
   font = new RFont("FreeSans.ttf",150);
 
   // get the points on the curve's shape
   // set style and segment resultion
-
   RCommand.setSegmentLength(200);
   RCommand.setSegmentator(RCommand.UNIFORMLENGTH);
 
@@ -46,7 +61,7 @@ void draw() {
   background(255);
 
   strokeWeight(2);
-  textSize(25); // for small numbers at bezier lines
+  textSize(25);
 
   int numberOfLetters = 10;
   for (int i=0; i<numberOfLetters; i++) {
@@ -61,7 +76,7 @@ void draw() {
     popMatrix();
   }
 
-  if (fontBuilt) {
+  if (fontBuilt) { // if the ttf has already been built, display it
     pushMatrix();
     textFont(myFont);
     textAlign(CENTER, CENTER);

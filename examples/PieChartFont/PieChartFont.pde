@@ -8,26 +8,6 @@
  * How to create a font for a simple textvisualisation.
  * - Type text
  * - Press 's' to save ttf and woff files
- *
- * Based on the example P_3_2_1_01.pde by Generative Gestaltung
- * http://www.generative-gestaltung.de/P_3_2_1_01
- *
- * Copyright 2013 Andreas Koller http://andreaskoller.com
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General
- * Public License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
  */
@@ -42,7 +22,7 @@ void setup() {
 
   size(600, 600);
 
-  createFont();
+  createFont(); // create the font
 
   fontSize = width/3;
 
@@ -52,15 +32,17 @@ void draw() {
 
   background(255);
 
-  PFont myFont = createFont(f.getTTFfilename(), fontSize);
-  PFont defaultFont = createFont("Helvetica", 8);
+  PFont myFont = createFont(f.getTTFfilename(), fontSize); // reading the font that has just been created
+  PFont defaultFont = createFont("Helvetica", 8); // for displaying readable text
 
-  fill(0,80);
+  // display the text in piechart font
+  fill(0,80);  // use alpha so you can see if two letters are in the same word (this circle segment then gets darker)
   textFont(myFont);
   textAlign(CENTER, CENTER);
 //  text(inputString, width/2 - fontSize/2, height/2); // works fine, but multiple letters in one word don't show up
   textByChar(inputString, width/2 - fontSize/2, height/2); // better
 
+  // display the text in readable font
   fill(0);
   textFont(defaultFont);
   textSize(14);
@@ -85,25 +67,28 @@ void createFont() {
   float charWidth = 1024;
 
   f = new Fontastic(this, "PieChart");
-  f.setAdvanceWidth(0);
+  f.setAdvanceWidth(0); // set advance width to zero so characters of one word are placed on top of each other
 
-  f.addGlyph(' ').setAdvanceWidth(int(charWidth*1.1));
+  f.addGlyph(' ').setAdvanceWidth(int(charWidth*1.1)); // only SPACE character advances to the next word
 
   int i = 0;
 
+  // go through alphabet and create contours for each glyph
   for (char c : Fontastic.alphabet) {
 
     f.addGlyph(c);
     f.addGlyph(Character.toLowerCase(c));
 
     // draw pie piece
+    // PVector array with points for uppercase characters
     PVector[] points = new PVector[9];
     points[0] = new PVector(charWidth/2, charWidth/2); // first point in middle
 
+    // PVector array with points for lowercase characters
     PVector[] pointsLc = new PVector[9];
     pointsLc[0] = new PVector(charWidth/2, charWidth/2); // first point in middle
 
-    for (int j=0; j<8; j++) {
+    for (int j=0; j<8; j++) { // the circle segment is drawn in 8 steps
 
       float angle = TWO_PI/(Fontastic.alphabet.length * 1f) * i;
       float angleStep = TWO_PI/(Fontastic.alphabet.length * 1f) / 7f;
@@ -128,10 +113,9 @@ void createFont() {
     i++;
   }
 
-
   PVector[] points;
 
-  // Glyph .
+  // Glyph .  (dot) is a small circle in the middle
   points = new PVector[36];
 
   for (int j=0; j<points.length; j++) {
@@ -143,7 +127,7 @@ void createFont() {
   }
   f.addGlyph('.').addContour(points);
 
-  // Glyph -
+  // Glyph -  (dash) is a small semi-circle in the middle
   points = new PVector[18];
 
   for (int j=0; j<points.length; j++) {
@@ -156,7 +140,7 @@ void createFont() {
   }
   f.addGlyph('-').addContour(points);
 
-    // Glyph ,
+    // Glyph ,   (comma) is a small circle rotated 90 degrees in the middle
   points = new PVector[18];
 
   for (int j=0; j<points.length; j++) {
@@ -177,6 +161,7 @@ void createFont() {
 
 void keyPressed() {
 
+  // process keyboard input and add to String inputString
   for (int j=0; j<Fontastic.alphabet.length; j++) {
     if (key == Fontastic.alphabet[j]) {
       inputString += Fontastic.alphabet[j];
@@ -191,15 +176,18 @@ void keyPressed() {
     }
   }
 
+  // hitting ESC deletes the text
   if (key == ESC) {
     inputString = "";
     key = 0;
   }
 
+  // delete the last character when pressing BACKSPACE
   if (keyCode == BACKSPACE) {     
     if (inputString.length() > 0) inputString = inputString.substring( 0, inputString.length()-1 );
   }
 
+  // SPACE
   if (key == ' ') {
     inputString += ' ';
   }

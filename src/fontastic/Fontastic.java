@@ -25,7 +25,7 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
- * @modified    02/11/2013
+ * @modified    02/12/2013
  * @version     0.2 (2)
  */
 
@@ -58,10 +58,7 @@ import java.util.regex.Matcher;
 /**
  * Fontastic A font file writer for Processing. http://code.andreaskoller.com/libraries/fontastic
  * 
- * @example Fontastic
- * 
  */
-
 public class Fontastic {
 
 	private PApplet myParent;
@@ -259,7 +256,7 @@ public class Fontastic {
 		String htmlTemplate = myParent.join(myParent.loadStrings("template.html"), "\n");
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("FONTNAME", fontname);
-		params.put("WOFFFILENAME", getWOFFfilename());
+		params.put("WOFFFILENAME", getFontname()+".woff");
 		String htmlContent = replaceAll(htmlTemplate, params);
 		
 		myParent.saveStrings(HTMLfilename, myParent.split(htmlContent, "\n"));

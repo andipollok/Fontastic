@@ -1,3 +1,19 @@
+ /**
+ * Fontastic
+ * A font file writer for Processing.
+ * http://code.andreaskoller.com/libraries/fontastic
+ *
+ * Example: FrequencyFont
+ *
+ * How to create a font based on a dataset
+ * This example takes the frequency of the letters in the English language
+ * to draw different sized bars for each character.
+ * Letter frequency taken from: http://en.wikipedia.org/wiki/Letter_frequency
+ *
+ * 
+ * @author      Andreas Koller http://andreaskoller.com
+ */
+ 
 import fontastic.*;
 import java.util.*;
 
@@ -13,6 +29,7 @@ void setup() {
   createFont();
 
 }
+
 
 void draw() {
 
@@ -78,6 +95,8 @@ void createFont() {
   }
   
   f.buildFont();
+  
   f.cleanup();
+  
 }
 
