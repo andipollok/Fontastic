@@ -8,3 +8,7 @@ TODO List
  - OTF Export
 
  - Look into UFO format and implement UFO exporter
+
+ - Support for special characters
+
+ - Support for ligatures
