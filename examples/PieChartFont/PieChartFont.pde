@@ -7,7 +7,8 @@
  *
  * How to create a font for a simple textvisualisation.
  * - Type text
- * - Press 's' to save ttf and woff files
+ * - Press 'ESC' to reset text
+ * 
  * 
  * @author      Andreas Koller http://andreaskoller.com
  */
