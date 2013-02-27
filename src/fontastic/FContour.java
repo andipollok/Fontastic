@@ -5,7 +5,7 @@ package fontastic;
  * A font file writer for Processing.
  * http://code.andreaskoller.com/libraries/fontastic
  *
- * Copyright 2013 Andreas Koller http://andreaskoller.com
+ * Copyright (C) 2012 Andreas Koller http://andreaskoller.com
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,8 +23,8 @@ package fontastic;
  * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
- * @modified    02/12/2013
- * @version     0.2 (2)
+ * @modified    02/27/2013
+ * @version     0.3 (3)
  */
 
 import processing.core.PVector;
