@@ -3,9 +3,11 @@
  * A font file writer for Processing.
  * http://code.andreaskoller.com/libraries/fontastic
  *
- * Example: RandomFont
+ * Example: WaveFont
  *
- * How to create a random shape for each character of the alphabet.
+ * How to create characters with bezier curves.
+ * The example also includes a way to preview
+ * the bezier shapes before building the font.
  * 
  * @author      Andreas Koller http://andreaskoller.com
  */
