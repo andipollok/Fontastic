@@ -25,13 +25,13 @@ category = Typography
 # repeating the name of your library here. Also, avoid saying anything redundant 
 # like mentioning that it's a library. This should start with a capitalized 
 # letter, and end with a period.
-sentence = A font file writer for Processing.
+sentence = A font file writer to create TTF and WOFF (Webfonts).
 
 # Additional information suitable for the Processing website. The value of
 # 'sentence' always will be prepended, so you should start by writing the
 # second sentence here. If your library only works on certain operating systems,
 # mention it here.
-paragraph = Easily create and export TTF and WOFF (Webfonts). 
+paragraph =  
 
 # Links in the 'sentence' and 'paragraph' attributes can be inserted using the
 # same syntax as for authors. 

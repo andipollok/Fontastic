@@ -1,6 +1,6 @@
 /**
  * Fontastic
- * A font file writer for Processing.
+ * A font file writer to create TTF and WOFF (Webfonts).
  * http://code.andreaskoller.com/libraries/fontastic
  *
  * Copyright (C) 2013 Andreas Koller http://andreaskoller.com
@@ -56,7 +56,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
- * Fontastic A font file writer for Processing. http://code.andreaskoller.com/libraries/fontastic
+ * Fontastic A font file writer to create TTF and WOFF (Webfonts). http://code.andreaskoller.com/libraries/fontastic
  * 
  */
 public class Fontastic {
