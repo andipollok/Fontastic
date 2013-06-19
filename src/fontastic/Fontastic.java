@@ -3,7 +3,7 @@
  * A font file writer for Processing.
  * http://code.andreaskoller.com/libraries/fontastic
  *
- * Copyright (C) 2012 Andreas Koller http://andreaskoller.com
+ * Copyright (C) 2013 Andreas Koller http://andreaskoller.com
  *
  * Uses:
  *  doubletype http://sourceforge.net/projects/doubletype/ for TTF creation
@@ -25,8 +25,8 @@
  * Boston, MA  02111-1307  USA
  * 
  * @author      Andreas Koller http://andreaskoller.com
- * @modified    02/27/2013
- * @version     0.3 (3)
+ * @modified    06/19/2013
+ * @version     0.4 (4)
  */
 
 package fontastic;
@@ -76,7 +76,7 @@ public class Fontastic {
 
 	private int advanceWidth = 512;
 
-	public final static String VERSION = "0.3";
+	public final static String VERSION = "0.4";
 	private boolean debug = true; // debug toggles println calls
 
 	/** Uppercase alphabet 26 characters **/
